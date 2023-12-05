@@ -1,0 +1,198 @@
+To connect EC2 it is necessary to install  following extentions:
+
+https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh
+marketplace.visualstudio.commarketplace.visualstudio.com
+Remote - SSH - Visual Studio Marketplace
+Extension for Visual Studio Code - Open any folder on a remote machine using SSH and take advantage of VS Code's full feature set.
+
+
+
+https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh-edit
+marketplace.visualstudio.commarketplace.visualstudio.com
+Remote - SSH: Editing Configuration Files  Studio Code - Edit SSH configuration files
+
+
+
+1.Keep the following files in a folder or push them to the github
+
+   -saved model
+   -app.py file (streamlit commands)
+   -requirements.txt and other files
+
+2. open your aws console
+
+3. Open EC2 Dashboard and Launch Instance (t2.micro )
+
+   - enter EC2 name (ex: hillary-deneme1)
+   - aws linux machine
+   - t2.micro 
+   - Key pair login- create a new key pair- with default settings
+   - Name your key pem and download it (automatically downladed)
+   - store your key pair on your computer
+   - click "launch instance" button
+   - then you can see the "success message" about the instance was successfully launched     
+
+4. Security Group Settings from Network Settings
+
+   - after the instance get running state, click the check box in front of the new instance
+   - click Security (On the right side of details from the bottom part)
+   - For Inbound rules click launch-wizard-5
+   - click "inbound rules" next to the details and click "Edit inbound rules"
+   - click "Add rule"
+
+5. Due to we want our app to be public we should set following configurations:
+
+   (Add Rule 2 times by clicking on Add Rule button)
+
+   a. Rule-1: Select "Custom TCP Rule" and set 8501 as port range and 0000 in soruce column (Anywhere IPv4)
+   b. Rule-2: Select "Custom TCP Rule" and set 8502 as port range and 0000 in soruce column (Anywhere IPv4)
+
+Together with the default rule (starting with SSH) there will be 3 rules.
+
+Then click "Save Rule"
+
+6. Set config file to connect to instance using VS Code
+
+   a. click the checkbox in front of the instance name
+   b. click on "Connect" button and see "Connect to instance" page
+   c. click on "EC2 Instance Connect" button to open EC2 Instance Connect page
+   d. Go to VS Code and open the command pallette using settings button
+   e. Select "Remote-SSH: Open SSH Configuration File" and select "c:\Users\user\.ssh\config" respectivley to open ssh config file. Then config file will be opened.
+   f. Set the config file:
+      - Give a name to your Host
+      - copy Public Public IP address from AWS EC2 Instance Connect page and paste it to config file as HostName
+      - copy the path of key pair from your computer and paste it to config file as IdentityFile
+      - finally save config file
+
+7. Connect to instance using VS Code
+
+   a. Connect to host (Left bottom corner green icon on VS Code)
+   b. Connect to host and Select the host name (the name from config file)
+   c. Select linux and continue
+   d. Click on Terminal and see we have connected to the EC2
+
+ 
+8. Copy app files into ec2
+
+   - Create folder in ec2 using terminal or using file tab ("mkdir foldername" from terminal)
+   - change directory to new folder
+     cd foldername
+   - Copy files from desktop into new folder by drag-drop method
+
+   or 
+ 
+   if you cannot copy via vscode use secure copy method:
+
+     scp -i richard_new_3.pem requirements.txt ec2-user@52.71.254.30:/home/ec2-user/streamlit6
+                  
+     (your keypair should at the same the directory with target data)
+
+   or
+
+   use git clone method:
+
+   push the files to git
+   then on terminal:
+      $ sudo yum install git
+      $ git clone https://github.com/hllry2022/MLD_Streamlit_Cloud.gitt  (before that you need to copy the htpps addres from your git accout)
+
+
+9. type python and python3 to see python versions ("exit()" to escape)
+
+   to update python: 
+
+      sudo yum update -y 
+
+   to insall python3 if there is no python3:    
+  
+      $ sudo yum install python3.8  (ec2 supports 3.8)
+   or
+      sudo amazon-linux-extras install python3.8
+
+   to install pip if there is no pip:
+     
+     sudo yum update && sudo yum install python3-pip
+     (if pip doesn't work again visit this page: https://stackoverflow.com/questions/67218285/trying-to-install-pip3-in-amazon-linux-2)
+ 
+
+10. to create venv and install packages into env in ec2
+
+    python3 -m venv env_name
+
+11.to activate venv(maybe pip required -----python -m pip3 install -U pip-------)
+   
+    source env_name/bin/activate
+
+12. install required packages inside this folder(foldername) in ec2
+
+   - pip3 install scikit-learn==1.2.2
+   
+   - pip3 install streamlit==1.22.0
+
+   or
+
+   pip install -r requirements.txt
+
+   (pip list) to see the packages
+   (pip freeze > requirement.txt) to create requirement file
+
+
+13. to run app
+   streamlit run app.py
+
+   You can now view your Streamlit app in your browser.
+
+      Network URL: http://172.31.28.28:8501
+      External URL: http://18.188.133.122:8501
+
+
+   (When you close the git bash no matter the instance is working the app will stop. To prevent the app from this or in other words to let it work even you exit from the gitbash you should install tmux)
+
+14. to stop running app
+    "Control C"
+
+15. to install the tmux
+    (Make your Linux terminal more useful with tmux, a terminal multiplexer that allows you to run multiple Linux programs over a single connection.)
+
+   $ sudo yum install tmux
+
+16. to create a new tmux session
+
+   # tmux new -s st_instance
+
+17. run the app 
+
+   $ streamlit run app.py
+
+Then it is ok. Even if you close the gitbash or what ever you are using for linux, the app will continue to work.
+
+   You can now view your Streamlit app in your browser.                                                                                     
+      Network URL: http://172.31.21.107:8501                                        
+      External URL: http://3.17.161.155:8501 
+
+18. to detach from tmux session
+   "control b" then remove your fingers from keyboard then "d"
+
+   this for to detach (if you again want to attach: tmux attach -t st_instance)
+
+19. to kill the session
+   tmux kill-session -t st_instance
+
+
+IF YOU WANT TO WORK IN VS CODE USING JUPYTER NOTEBOOK:
+1. After connecting to VS Code, you can use jupyter notebook in VS Code. .Before that you should install the following extensions:
+
+   a. python extensions in SSH
+   b. Jupyter,
+   c. Jupyter Keymap,
+   d. Jupyter PowerToys,
+   e. Jupyter Notebook Renderers,
+   f. VS Code Jupyter Notebook Previewer
+
+2. Open up a jupyter notebook and chose kernel(it is a small icon in the top right hand corner of the kernal)
+3. Then in the top middle it offers you to install other extensions click whatever extension it recommend and move to the extensions menu to see if VScode requires a restarts to be able to use any of these.
+4. Then you can start to use jupyter notebook in VS Code opened in EC2.
+
+ 
+
+
